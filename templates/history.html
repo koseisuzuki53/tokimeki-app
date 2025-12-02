@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>履歴</h2>
+
+<p>アイテムの追加・ときめき評価・削除の履歴一覧です。</p>
+
+<ul class="list-group">
+
+    {% for log in logs %}
+    <li class="list-group-item">
+        <strong>{{ log.action }}</strong><br>
+
+        {% if log.item_name %}
+            アイテム名：{{ log.item_name }}<br>
+        {% endif %}
+
+        {% if log.category %}
+            カテゴリ：{{ log.category }}<br>
+        {% endif %}
+
+        {% if log.tokimeki is not none %}
+            ときめき度：{{ log.tokimeki }}<br>
+        {% endif %}
+
+        {% if log.mood %}
+            気分メモ：{{ log.mood }}<br>
+        {% endif %}
+
+        <small>日時：{{ log.timestamp }}</small>
+    </li>
+    {% endfor %}
+
+</ul>
+
+{% endblock %}

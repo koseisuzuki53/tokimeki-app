@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>登録アイテム</h2>
+
+<a href="{{ url_for('add_item') }}" class="btn btn-primary mb-3">アイテム追加</a>
+
+{% if quest %}
+<div class="card mb-4">
+  <div class="card-body">
+    <h4>今日のクエスト</h4>
+    <p>{{ quest.quest_text }}</p>
+
+    <a href="{{ url_for('resolve_quest', item_id=quest.item_id) }}"
+       class="btn btn-success">
+       クエストを達成する
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<ul class="list-group">
+{% for item in items %}
+  <li class="list-group-item">
+    <strong>{{ item.name }}</strong>（ときめき：{{ item.tokimeki }}）
+    <span class="text-muted">カテゴリ：{{ item.category }}</span>
+
+    <div class="mt-2">
+      <a href="{{ url_for('rate_item', item_id=item.id) }}" class="btn btn-sm btn-info">評価</a>
+      <a href="{{ url_for('delete_with_mood', item_id=item.id) }}" class="btn btn-sm btn-danger">削除</a>
+    </div>
+  </li>
+{% endfor %}
+</ul>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3>🗑️ 「{{ item.name }}」を手放しますか？</h3>
+
+<form method="POST">
+  <p>記録してみよう。</p>
+
+  <div class="mb-2">
+    <label>処分すると決めて、どんな気分？　うれしい？うれしくない？（1〜5）</label>
+    <input type="number" name="mood" min="1" max="5" required class="form-control w-25">
+  </div>
+
+  <div class="mb-2">
+    <label>処分で感じた満足感は？　大満足？まだ満足できない？（1〜5）</label>
+    <input type="number" name="satisfaction" min="1" max="5" class="form-control w-25">
+  </div>
+
+  <div class="mb-3">
+    <label>処分を決めた感想・気づいたことを書いてみよう。</label>
+    <textarea name="note" rows="2" class="form-control" placeholder="気持ちの変化など"></textarea>
+  </div>
+
+  <button type="submit" class="btn btn-danger w-100">記録して処分確定</button>
+</form>
+
+<a href="{{ url_for('index') }}" class="btn btn-outline-secondary w-100 mt-3">キャンセル</a>
+{% endblock %}

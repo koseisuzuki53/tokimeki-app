@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>アイテム追加</h2>
+
+<form action="{{ url_for('add_item') }}" method="POST" enctype="multipart/form-data">
+
+  <!-- 名前 -->
+  <div class="mb-3">
+    <label class="form-label">アイテム名</label>
+    <input type="text" name="name" class="form-control" required>
+  </div>
+
+  <!-- カテゴリ -->
+  <div class="mb-3">
+    <label class="form-label">カテゴリ</label>
+    <select name="category" class="form-select" required>
+      <option value="">選択してください</option>
+      <option value="衣類">衣類</option>
+      <option value="本">本</option>
+      <option value="雑貨">雑貨</option>
+      <option value="デジタル">デジタル</option>
+      <option value="書類">書類</option>
+      <option value="その他">その他</option>
+    </select>
+  </div>
+
+  <!-- 特徴 -->
+  <div class="mb-3">
+    <label class="form-label">特徴メモ（任意）</label>
+    <textarea name="features" class="form-control" rows="3" placeholder="例：サイズ大きめ・思い出の品・用途限定など"></textarea>
+  </div>
+
+  <!-- 写真アップロード -->
+  <div class="mb-3">
+    <label class="form-label">写真（任意）</label>
+    <input type="file" name="image" class="form-control" accept="image/*">
+  </div>
+
+  <!-- 送信 -->
+  <button type="submit" class="btn btn-primary">追加する</button>
+  <a href="{{ url_for('index') }}" class="btn btn-secondary">戻る</a>
+
+</form>
+
+{% endblock %}

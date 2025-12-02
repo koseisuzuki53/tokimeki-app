@@ -1,0 +1,5 @@
+Flask==3.0.0
+gunicorn
+Werkzeug
+Jinja2
+Flask-SQLAlchemy
