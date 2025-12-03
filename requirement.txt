@@ -3,3 +3,4 @@ gunicorn
 Werkzeug
 Jinja2
 Flask-SQLAlchemy
+flask_login
