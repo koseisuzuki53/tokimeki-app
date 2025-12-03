@@ -3,8 +3,13 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import random
-
 app = Flask(__name__)
+
+# 🔑 重要：セッション用のキーを設定
+app.secret_key = os.environ.get("SECRET_KEY", "your-secret-key")
+
+
+
 
 # Render / ローカル両対応
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -22,10 +27,13 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     category = db.Column(db.String(50))
-    tokimeki = db.Column(db.Integer)       # None = 未評価
+    tokimeki = db.Column(db.Integer)
     features = db.Column(db.String(200))
     image_path = db.Column(db.String(200))
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 
 
 class ActionLog(db.Model):
@@ -34,6 +42,24 @@ class ActionLog(db.Model):
     item_name = db.Column(db.String(100))
     mood = db.Column(db.String(100))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+from flask_login import UserMixin
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+
+    items = db.relationship("Item", backref="user", lazy=True)
+
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 with app.app_context():
@@ -68,8 +94,10 @@ def generate_template_quest(item):
 # Routes
 # ---------------------------
 @app.route("/")
+@login_required
 def index():
-    items = Item.query.order_by(Item.date_added.desc()).all()
+    items = Item.query.filter_by(user_id=current_user.id).order_by(Item.date_added.desc()).all()
+
 
     # 1. 未評価アイテム → 最優先
     unrated_item = Item.query.filter(Item.tokimeki.is_(None)).first()
@@ -115,6 +143,7 @@ def index():
 
 
 @app.route("/add", methods=["GET", "POST"])
+@login_required
 def add_item():
     if request.method == "POST":
         name = request.form["name"]
@@ -125,8 +154,10 @@ def add_item():
             name=name,
             category=category,
             tokimeki=None,
-            features=features
+            features=features,
+            user_id=current_user.id
         )
+
         db.session.add(item)
         db.session.commit()
 
@@ -136,6 +167,7 @@ def add_item():
 
 
 @app.route("/rate/<int:item_id>", methods=["GET", "POST"])
+@login_required
 def rate_item(item_id):
     item = Item.query.get_or_404(item_id)
 
@@ -155,6 +187,7 @@ def rate_item(item_id):
 
 
 @app.route("/delete/<int:item_id>", methods=["GET", "POST"])
+@login_required
 def delete_with_mood(item_id):
     item = Item.query.get_or_404(item_id)
 
@@ -171,12 +204,14 @@ def delete_with_mood(item_id):
 
 
 @app.route("/history")
+@login_required
 def history():
     logs = ActionLog.query.order_by(ActionLog.timestamp.desc()).all()
     return render_template("history.html", logs=logs)
 
 
 @app.route("/resolve_quest/<item_id>")
+@login_required
 def resolve_quest(item_id):
 
     # 特別クエスト ＝ 新規追加
@@ -198,6 +233,45 @@ def resolve_quest(item_id):
         return redirect(url_for("delete_with_mood", item_id=item.id))
 
     return redirect(url_for("rate_item", item_id=item.id))
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        hashed_pw = generate_password_hash(password)
+
+        user = User(username=username, password_hash=hashed_pw)
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password_hash, password):
+            login_user(user)
+            return redirect(url_for("index"))
+
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="container mt-4" style="max-width: 400px;">
+    <h2 class="mb-4 text-center">新規登録</h2>
+
+    <form method="POST">
+        <div class="form-group mb-3">
+            <label>ユーザー名</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>パスワード</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+
+        <button class="btn btn-success w-100 mt-3" type="submit">登録する</button>
+    </form>
+
+    <p class="text-center mt-3">
+        すでにアカウントがありますか？
+        <a href="{{ url_for('login') }}">ログインへ</a>
+    </p>
+</div>
+
+{% endblock %}
