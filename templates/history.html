@@ -3,25 +3,31 @@
 
 <h2>履歴</h2>
 
-<p>アイテムの追加・ときめき評価・削除の履歴一覧です。</p>
+<!-- 集計情報カード -->
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">あなたの片づけデータ</h5>
+        <p>⭐ ときめき評価をした回数：<strong>{{ rated_count }}</strong></p>
+        <p>🗑 手放したアイテムの数：<strong>{{ deleted_count }}</strong></p>
+    </div>
+</div>
+
+<p>以下はアイテムの評価・削除などの行動履歴です。</p>
 
 <ul class="list-group">
 
     {% for log in logs %}
     <li class="list-group-item">
-        <strong>{{ log.action }}</strong><br>
 
-        {% if log.item_name %}
-            アイテム名：{{ log.item_name }}<br>
+        {% if log.action_type == "rate" %}
+            <strong>【ときめき評価】</strong><br>
+        {% elif log.action_type == "delete" %}
+            <strong>【削除】</strong><br>
+        {% else %}
+            <strong>{{ log.action_type }}</strong><br>
         {% endif %}
 
-        {% if log.category %}
-            カテゴリ：{{ log.category }}<br>
-        {% endif %}
-
-        {% if log.tokimeki is not none %}
-            ときめき度：{{ log.tokimeki }}<br>
-        {% endif %}
+        アイテム名：{{ log.item_name }}<br>
 
         {% if log.mood %}
             気分メモ：{{ log.mood }}<br>
